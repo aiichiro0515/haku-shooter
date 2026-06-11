@@ -102,6 +102,7 @@
     let enemies = [];
     let particles = [];
     let speeches = [];
+    let killCount = 0;
 
     const phrases = [
       'にゃんにゃん！', 'にゃーん♡', 'にゃにゃにゃ！',
@@ -166,6 +167,7 @@
       player.y = H - 80;
       player.invincible = 0;
       touchX = null;
+      killCount = 0;
       updateUI();
     }
 
@@ -354,8 +356,9 @@
 
         if (e.hp <= 0) {
           score += e.score;
+          killCount++;
           spawnParticles(e.x, e.y, e.color);
-          spawnSpeech();
+          if (killCount % 5 === 0) spawnSpeech();
           updateUI();
           return false;
         }
@@ -378,8 +381,8 @@
       });
 
       speeches = speeches.filter(s => {
-        s.y -= 0.5;
-        s.life -= 0.018;
+        s.y -= 0.3;
+        s.life -= 0.007;
         return s.life > 0;
       });
 
