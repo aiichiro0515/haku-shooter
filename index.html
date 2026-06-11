@@ -101,6 +101,17 @@
     let bullets = [];
     let enemies = [];
     let particles = [];
+    let speeches = [];
+
+    const phrases = [
+      'にゃんにゃん！', 'にゃーん♡', 'にゃにゃにゃ！',
+      'かほのようにすばやく！', 'かほかほかーほ♡', 'かほりんりん！♪'
+    ];
+
+    function spawnSpeech() {
+      const text = phrases[Math.floor(Math.random() * phrases.length)];
+      speeches.push({ text, life: 1.0, x: player.x, y: player.y - 60 });
+    }
     let keys = {};
     let touchX = null; // タッチ中の指のX座標（canvas座標系）
 
@@ -344,6 +355,7 @@
         if (e.hp <= 0) {
           score += e.score;
           spawnParticles(e.x, e.y, e.color);
+          spawnSpeech();
           updateUI();
           return false;
         }
@@ -363,6 +375,12 @@
       particles = particles.filter(p => {
         p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= 0.03;
         return p.life > 0;
+      });
+
+      speeches = speeches.filter(s => {
+        s.y -= 0.5;
+        s.life -= 0.018;
+        return s.life > 0;
       });
 
       const newLevel = Math.floor(score / 200) + 1;
@@ -416,6 +434,35 @@
 
       bullets.forEach(b => drawBullet(b));
       drawPlayer(player.x, player.y, player.invincible);
+
+      // セリフ吹き出し
+      speeches.forEach(s => {
+        ctx.save();
+        ctx.globalAlpha = s.life;
+        ctx.font = 'bold 14px sans-serif';
+        const tw = ctx.measureText(s.text).width;
+        const bw = tw + 16, bh = 26, br = 10;
+        const bx = s.x - bw / 2, by = s.y - bh;
+
+        // 吹き出し背景
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, br);
+        ctx.fill();
+
+        // しっぽ（三角）
+        ctx.beginPath();
+        ctx.moveTo(s.x - 6, by + bh);
+        ctx.lineTo(s.x + 6, by + bh);
+        ctx.lineTo(s.x, by + bh + 8);
+        ctx.fill();
+
+        // テキスト
+        ctx.fillStyle = '#cc3377';
+        ctx.textAlign = 'center';
+        ctx.fillText(s.text, s.x, by + bh - 7);
+        ctx.restore();
+      });
     }
 
     function drawTitle() {
